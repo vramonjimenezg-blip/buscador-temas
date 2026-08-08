@@ -9,7 +9,7 @@ st.title("🧠 Buscador de Avances Académicos & Creador de Contenido")
 st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn a presupuesto $0.")
 
 # API Key fija
-API_KEY_FIJA = "AQ.Ab8RN6KHFcbOwl3-mMoYcdKlWWedBNjUADfCG4xZKIk5QeYbKg"
+API_KEY_FIJA = "AIzaSyCT-zvQ7ucZdxtJDo7Cd2FRSgWZ2zgshw0"
 
 # Campo para el tema
 tema = st.text_input("¿Qué tema deseas investigar hoy?", placeholder="Ej. Nuevos avances al crear una Estrategia Comercial...")
