@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 import streamlit.components.v1 as components
 
 # Configuración visual de la página
@@ -8,16 +8,15 @@ st.set_page_config(page_title="Investigador de Avances & Contenido", page_icon="
 st.title("🧠 Buscador de Avances Académicos & Creador de Contenido")
 st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn a presupuesto $0.")
 
-# Campo para que el usuario ingrese su API Key de Gemini
+# Campo para la API Key
 api_key = st.sidebar.text_input("Ingresa tu Gemini API Key:", type="password")
 
-# Campo para ingresar el tema a investigar
+# Campo para el tema
 tema = st.text_input("¿Qué tema deseas investigar hoy?", placeholder="Ej. Inteligencia Artificial en Finanzas, Nanotecnología en Salud...")
 
-# Prompt Maestro Definitivo integrado
+# Prompt Maestro Definitivo
 PROMPT_MAESTRO = """
-ROL: 
-Eres un analista e investigador científico y de negocios internacional. Tu especialidad es la investigación profunda, la triangulación de datos y la divulgación ejecutiva.
+ROL: Eres un analista e investigador científico y de negocios internacional. Tu especialidad es la investigación profunda, la triangulación de datos y la divulgación ejecutiva.
 
 TAREA Y FUENTES PERMITIDAS:
 1. Analiza e investiga a profundidad el tema: "{TEMA}".
@@ -89,13 +88,18 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
     else:
         with st.spinner("Investigando fuentes académicas globales y procesando información..."):
             try:
-                genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash-latest")
+                # Nueva inicialización de Google GenAI
+                client = genai.Client(api_key=api_key)
                 
                 prompt_final = PROMPT_MAESTRO.format(TEMA=tema)
-                response = model.generate_content(prompt_final)
-                texto_resultado = response.text
                 
+                # Llamada al modelo estable de la nueva API
+                response = client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=prompt_final,
+                )
+                
+                texto_resultado = response.text
                 st.success("¡Investigación completada con éxito!")
                 
                 # Separar las secciones
@@ -108,7 +112,6 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
                     sec1 = partes[1] if len(partes) > 1 else texto_resultado
                     st.markdown(sec1)
                     
-                    # Generación de mapa mental gráfico HTML interactivo mediante Markmap
                     markmap_html = f"""
                     <script src="https://cdn.jsdelivr.net/npm/markmap-autoloader"></script>
                     <div class="markmap">
@@ -128,4 +131,4 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
                     st.markdown(sec3)
                     
             except Exception as e:
-                st.error(f"Ocurrió un error al conectar con Gemini: {e}")
+                st.error(f"Error al conectar con Gemini: {e}")
