@@ -1,20 +1,19 @@
 import streamlit as st
-from google import genai
+import google.generativeai as genai
 import streamlit.components.v1 as components
 
-# Configuración visual de la página
+# Configuración visual
 st.set_page_config(page_title="Investigador de Avances & Contenido", page_icon="🧠", layout="wide")
 
 st.title("🧠 Buscador de Avances Académicos & Creador de Contenido")
 st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn a presupuesto $0.")
 
-# Campo para la API Key
-api_key = st.sidebar.text_input("Ingresa tu Gemini API Key:", type="password")
+# API Key fija
+API_KEY_FIJA = "AQ.Ab8RN6KHFcbOwl3-mMoYcdKlWWedBNjUADfCG4xZKIk5QeYbKg"
 
 # Campo para el tema
-tema = st.text_input("¿Qué tema deseas investigar hoy?", placeholder="Ej. Inteligencia Artificial en Finanzas, Nanotecnología en Salud...")
+tema = st.text_input("¿Qué tema deseas investigar hoy?", placeholder="Ej. Nuevos avances al crear una Estrategia Comercial...")
 
-# Prompt Maestro Definitivo
 PROMPT_MAESTRO = """
 ROL: Eres un analista e investigador científico y de negocios internacional. Tu especialidad es la investigación profunda, la triangulación de datos y la divulgación ejecutiva.
 
@@ -22,7 +21,7 @@ TAREA Y FUENTES PERMITIDAS:
 1. Analiza e investiga a profundidad el tema: "{TEMA}".
 2. RESTRICCIÓN DE FUENTES: Busca ÚNICAMENTE en repositorios y bases de datos académicas/científicas reconocidas (ej. Google Académico, ResearchGate, Academia.edu, ArXiv, SSRN, DOAJ, CORE, Redalyc, SciELO).
 3. ALCANCE GLOBAL Y MULTILINGÜE: Rastra publicaciones a nivel mundial sin importar el idioma de origen (incluyendo Asia, Europa, América). Traduce y sintetiza todo al español.
-4. TRIANGULACIÓN Y CONTRASTACIÓN: Para CADA UNO de los 5 avances seleccionados, contrasta y valida la información utilizando al menos 2 o 3 artículos o fuentes científicas distintas.
+4. TRIANGULACIÓN Y CONTRASTACIÓN: Para CADA UNO de los 5 avances seleccionados, contrasta y valida la información utilizando al meos 2 o 3 artículos o fuentes científicas distintas.
 
 FORMATO DE SALIDA REQUERIDO (Estricto):
 
@@ -81,30 +80,21 @@ SECCIÓN 3: BLOG Y LINKEDIN
 """
 
 if st.button("🚀 Generar Investigación y Contenido", type="primary"):
-    if not api_key:
-        st.error("Por favor ingresa tu API Key de Gemini en la barra lateral.")
-    elif not tema:
+    if not tema:
         st.warning("Por favor escribe un tema para investigar.")
     else:
         with st.spinner("Investigando fuentes académicas globales y procesando información..."):
             try:
-                # Nueva inicialización de Google GenAI
-                client = genai.Client(api_key=api_key)
+                genai.configure(api_key=API_KEY_FIJA)
+                model = genai.GenerativeModel('gemini-1.5-flash')
                 
                 prompt_final = PROMPT_MAESTRO.format(TEMA=tema)
-                
-                # Llamada al modelo estable de la nueva API
-                response = client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt_final,
-                )
-                
+                response = model.generate_content(prompt_final)
                 texto_resultado = response.text
+                
                 st.success("¡Investigación completada con éxito!")
                 
-                # Separar las secciones
                 partes = texto_resultado.split("---")
-                
                 tab1, tab2, tab3 = st.tabs(["🗺️ Mapa Mental", "📱 Carrusel LinkedIn", "📝 Blog & Copy"])
                 
                 with tab1:
