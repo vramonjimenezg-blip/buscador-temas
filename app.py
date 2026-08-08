@@ -2,16 +2,15 @@ import streamlit as st
 import google.generativeai as genai
 import streamlit.components.v1 as components
 
-# Configuración visual
+# Configuración de la página
 st.set_page_config(page_title="Investigador de Avances & Contenido", page_icon="🧠", layout="wide")
 
 st.title("🧠 Buscador de Avances Académicos & Creador de Contenido")
-st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn a presupuesto $0.")
+st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn.")
 
-# API Key fija
+# PEGA AQUÍ LA CLAVE QUE COPIASTE DE AI STUDIO
 API_KEY_FIJA = "AIzaSyCT-zvQ7ucZdxtJDo7Cd2FRSgWZ2zgshw0"
 
-# Campo para el tema
 tema = st.text_input("¿Qué tema deseas investigar hoy?", placeholder="Ej. Nuevos avances al crear una Estrategia Comercial...")
 
 PROMPT_MAESTRO = """
@@ -21,7 +20,7 @@ TAREA Y FUENTES PERMITIDAS:
 1. Analiza e investiga a profundidad el tema: "{TEMA}".
 2. RESTRICCIÓN DE FUENTES: Busca ÚNICAMENTE en repositorios y bases de datos académicas/científicas reconocidas (ej. Google Académico, ResearchGate, Academia.edu, ArXiv, SSRN, DOAJ, CORE, Redalyc, SciELO).
 3. ALCANCE GLOBAL Y MULTILINGÜE: Rastra publicaciones a nivel mundial sin importar el idioma de origen (incluyendo Asia, Europa, América). Traduce y sintetiza todo al español.
-4. TRIANGULACIÓN Y CONTRASTACIÓN: Para CADA UNO de los 5 avances seleccionados, contrasta y valida la información utilizando al meos 2 o 3 artículos o fuentes científicas distintas.
+4. TRIANGULACIÓN Y CONTRASTACIÓN: Para CADA UNO de los 5 avances seleccionados, contrasta y valida la información utilizando al menos 2 o 3 artículos o fuentes científicas distintas.
 
 FORMATO DE SALIDA REQUERIDO (Estricto):
 
@@ -82,16 +81,32 @@ SECCIÓN 3: BLOG Y LINKEDIN
 if st.button("🚀 Generar Investigación y Contenido", type="primary"):
     if not tema:
         st.warning("Por favor escribe un tema para investigar.")
+    elif API_KEY_FIJA == "PEGA_AQUI_TU_API_KEY":
+        st.error("Recuerda pegar tu API Key de AI Studio en la línea 12 del código.")
     else:
         with st.spinner("Investigando fuentes académicas globales y procesando información..."):
             try:
                 genai.configure(api_key=API_KEY_FIJA)
-                model = genai.GenerativeModel('gemini-2.0-flash')
                 
-                prompt_final = PROMPT_MAESTRO.format(TEMA=tema)
-                response = model.generate_content(prompt_final)
+                # Búsqueda automática de modelo activo (A prueba de fallos)
+                modelos_a_probar = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash']
+                response = None
+                
+                for mod_name in modelos_a_probar:
+                    try:
+                        model = genai.GenerativeModel(mod_name)
+                        prompt_final = PROMPT_MAESTRO.format(TEMA=tema)
+                        res_temp = model.generate_content(prompt_final)
+                        if res_temp and res_temp.text:
+                            response = res_temp
+                            break
+                    except Exception:
+                        continue
+                
+                if not response:
+                    raise Exception("No se pudo conectar a Gemini. Asegúrate de haber obtenido la clave desde aistudio.google.com.")
+
                 texto_resultado = response.text
-                
                 st.success("¡Investigación completada con éxito!")
                 
                 partes = texto_resultado.split("---")
@@ -121,4 +136,4 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
                     st.markdown(sec3)
                     
             except Exception as e:
-                st.error(f"Error al conectar con Gemini: {e}")
+                st.error(f"Error: {e}")
