@@ -90,7 +90,7 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
         with st.spinner("Investigando fuentes académicas globales y procesando información..."):
             try:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("gemini-1.5-flash-latest")
                 
                 prompt_final = PROMPT_MAESTRO.format(TEMA=tema)
                 response = model.generate_content(prompt_final)
