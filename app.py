@@ -2,14 +2,25 @@ import streamlit as st
 import google.generativeai as genai
 import streamlit.components.v1 as components
 
-# Configuración de la página
+# Configuración visual
 st.set_page_config(page_title="Investigador de Avances & Contenido", page_icon="🧠", layout="wide")
 
 st.title("🧠 Buscador de Avances Académicos & Creador de Contenido")
 st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn.")
 
-# PEGA AQUÍ LA CLAVE QUE COPIASTE DE AI STUDIO
-API_KEY_FIJA = "AIzaSyCT-zvQ7ucZdxtJDo7Cd2FRSgWZ2zgshw0"
+# Manejo seguro de API Key
+api_key = None
+
+# 1. Buscar en los Secretos de Streamlit Cloud
+if "GEMINI_API_KEY" in st.secrets:
+    api_key = st.secrets["GEMINI_API_KEY"]
+
+# 2. Si no está configurada, mostrar casilla en la barra lateral
+with st.sidebar:
+    st.header("🔑 Configuración de API")
+    if not api_key:
+        api_key = st.text_input("Pega tu Gemini API Key aquí:", type="password", help="Obtenla en aistudio.google.com")
+        st.info("💡 Pegar tu clave aquí la mantiene 100% segura y evita que GitHub la anule.")
 
 tema = st.text_input("¿Qué tema deseas investigar hoy?", placeholder="Ej. Nuevos avances al crear una Estrategia Comercial...")
 
@@ -81,15 +92,14 @@ SECCIÓN 3: BLOG Y LINKEDIN
 if st.button("🚀 Generar Investigación y Contenido", type="primary"):
     if not tema:
         st.warning("Por favor escribe un tema para investigar.")
-    elif API_KEY_FIJA == "PEGA_AQUI_TU_API_KEY":
-        st.error("Recuerda pegar tu API Key de AI Studio en la línea 12 del código.")
+    elif not api_key:
+        st.error("Por favor ingresa tu API Key en la barra lateral izquierda.")
     else:
         with st.spinner("Investigando fuentes académicas globales y procesando información..."):
             try:
-                genai.configure(api_key=API_KEY_FIJA)
+                genai.configure(api_key=api_key.strip())
                 
-                # Búsqueda automática de modelo activo (A prueba de fallos)
-                modelos_a_probar = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash']
+                modelos_a_probar = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash']
                 response = None
                 
                 for mod_name in modelos_a_probar:
@@ -104,7 +114,7 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
                         continue
                 
                 if not response:
-                    raise Exception("No se pudo conectar a Gemini. Asegúrate de haber obtenido la clave desde aistudio.google.com.")
+                    raise Exception("No se pudo conectar con Gemini. Verifica que tu clave de Google AI Studio esté activa.")
 
                 texto_resultado = response.text
                 st.success("¡Investigación completada con éxito!")
@@ -136,4 +146,4 @@ if st.button("🚀 Generar Investigación y Contenido", type="primary"):
                     st.markdown(sec3)
                     
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Error al procesar: {e}")
