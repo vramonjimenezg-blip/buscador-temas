@@ -1,17 +1,15 @@
 import streamlit as st
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import streamlit.components.v1 as components
 
-# Configuración visual
 st.set_page_config(page_title="Investigador de Avances & Contenido", page_icon="", layout="wide")
 st.title("Buscador de Avances Académicos & Creador de Contenido")
-st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn (versión HuggingFace).")
+st.caption("Investigación profunda, mapas mentales y carruseles para LinkedIn (HuggingFace CPU).")
 
-# Cargar modelo gratuito de HuggingFace
 @st.cache_resource
 def cargar_modelo():
-    modelo = "meta-llama/Llama-3.2-3B-Instruct"
+    modelo = "Qwen/Qwen2.5-1.5B-Instruct"
     tokenizer = AutoTokenizer.from_pretrained(modelo)
     model = AutoModelForCausalLM.from_pretrained(modelo, torch_dtype=torch.float32)
     return tokenizer, model
@@ -27,7 +25,6 @@ Incluye estrictamente:
 
 ---
 SECCIÓN 1: MAPA MENTAL
-Formato Markdown jerárquico:
 # {TEMA}
 ## 1. Avance 1
 - Concepto:
@@ -77,7 +74,7 @@ if st.button("Generar Investigación y Contenido", type="primary"):
     if not tema:
         st.warning("Por favor escribe un tema para investigar.")
     else:
-        with st.spinner("Generando contenido con Llama 3 (HuggingFace)..."):
+        with st.spinner("Generando contenido con Qwen (HuggingFace CPU)..."):
             prompt_final = PROMPT_MAESTRO.format(TEMA=tema)
             texto_resultado = generar_respuesta(prompt_final)
 
